@@ -108,7 +108,7 @@ func (r *Repository) CreateTravelRequest(request *models.TravelRequest) error {
 
 func (r *Repository) GetAllTravelRequests() ([]models.TravelRequest, error) {
 	var requests []models.TravelRequest
-	err := r.db.Preload("TravelRequestEmployees.Employee.Position").Find(&requests).Error
+	err := r.db.Preload("TravelRequestEmployees.Employee.Position").Order("id DESC").Find(&requests).Error
 	return requests, err
 }
 

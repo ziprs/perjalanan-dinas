@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 export default function TravelRequestsPage() {
   const [requests, setRequests] = useState<TravelRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadRequests();
@@ -38,6 +40,17 @@ export default function TravelRequestsPage() {
       console.error('Failed to delete travel request:', error);
       alert('Gagal menghapus perjalanan dinas');
     }
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(requests.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRequests = requests.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -79,7 +92,7 @@ export default function TravelRequestsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {requests.map((request) => (
+                {currentRequests.map((request) => (
                   <tr key={request.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
                       {request.request_number}
@@ -141,6 +154,48 @@ export default function TravelRequestsPage() {
               </div>
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {requests.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+              <div className="text-sm text-gray-700">
+                Menampilkan {startIndex + 1} - {Math.min(endIndex, requests.length)} dari {requests.length} perjalanan dinas
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Sebelumnya
+                </button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`px-4 py-2 border rounded-lg text-sm font-medium ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Selanjutnya
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">

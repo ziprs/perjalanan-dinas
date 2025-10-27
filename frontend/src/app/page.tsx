@@ -374,7 +374,8 @@ export default function Home() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">-- Pilih Angkutan --</option>
-                <option value="Angkutan Umum">Angkutan Umum</option>
+                <option value="Kendaraan Umum">Kendaraan Umum</option>
+                <option value="Kendaraan Dinas">Kendaraan Dinas</option>
                 <option value="Pesawat">Pesawat</option>
                 <option value="Kereta Api">Kereta Api</option>
               </select>
@@ -394,7 +395,7 @@ export default function Home() {
               </button>
 
               <a
-                href="/spd/admin/login"
+                href="/admin/login"
                 className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium transition-colors"
               >
                 Admin Login

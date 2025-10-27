@@ -64,12 +64,10 @@ func (pg *PDFGenerator) GenerateNotaPermintaan(request *models.TravelRequest) ([
 	pdf.CellFormat(60, 8, "NAMA", "1", 0, "C", true, 0, "")
 	pdf.CellFormat(80, 8, "JABATAN", "1", 1, "C", true, 0, "")
 
-	pdf.SetFont("Arial", "", 10)
+	pdf.SetFont("Arial", "", 9)
+	empColWidths := []float64{10, 30, 60, 80}
 	for i, empRel := range request.TravelRequestEmployees {
-		pdf.CellFormat(10, 8, fmt.Sprintf("%d", i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(30, 8, empRel.Employee.NIP, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(60, 8, empRel.Employee.Name, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 8, empRel.Employee.Position.Title, "1", 1, "L", false, 0, "")
+		drawEmployeeRow(pdf, i+1, empRel.Employee.NIP, empRel.Employee.Name, empRel.Employee.Position.Title, empColWidths, 9)
 	}
 	pdf.Ln(5)
 
@@ -197,11 +195,9 @@ func (pg *PDFGenerator) GenerateBeritaAcara(request *models.TravelRequest, repor
 	pdf.CellFormat(90, 8, "Jabatan", "1", 1, "C", true, 0, "")
 
 	pdf.SetFont("Arial", "", 9)
+	empColWidths := []float64{12, 28, 50, 90}
 	for i, empRel := range request.TravelRequestEmployees {
-		pdf.CellFormat(12, 8, fmt.Sprintf("%d", i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(28, 8, empRel.Employee.NIP, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(50, 8, empRel.Employee.Name, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(90, 8, empRel.Employee.Position.Title, "1", 1, "L", false, 0, "")
+		drawEmployeeRow(pdf, i+1, empRel.Employee.NIP, empRel.Employee.Name, empRel.Employee.Position.Title, empColWidths, 9)
 	}
 	pdf.Ln(3)
 
@@ -380,12 +376,10 @@ func (pg *PDFGenerator) addNotaPermintaanPage(pdf *gofpdf.Fpdf, request *models.
 	pdf.CellFormat(60, 8, "NAMA", "1", 0, "C", true, 0, "")
 	pdf.CellFormat(80, 8, "JABATAN", "1", 1, "C", true, 0, "")
 
-	pdf.SetFont("Arial", "", 10)
+	pdf.SetFont("Arial", "", 9)
+	empColWidths := []float64{10, 30, 60, 80}
 	for i, empRel := range request.TravelRequestEmployees {
-		pdf.CellFormat(10, 8, fmt.Sprintf("%d", i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(30, 8, empRel.Employee.NIP, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(60, 8, empRel.Employee.Name, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 8, empRel.Employee.Position.Title, "1", 1, "L", false, 0, "")
+		drawEmployeeRow(pdf, i+1, empRel.Employee.NIP, empRel.Employee.Name, empRel.Employee.Position.Title, empColWidths, 9)
 	}
 	pdf.Ln(5)
 
@@ -507,11 +501,9 @@ func (pg *PDFGenerator) addBeritaAcaraPage(pdf *gofpdf.Fpdf, request *models.Tra
 	pdf.CellFormat(90, 8, "Jabatan", "1", 1, "C", true, 0, "")
 
 	pdf.SetFont("Arial", "", 9)
+	empColWidths := []float64{12, 28, 50, 90}
 	for i, empRel := range request.TravelRequestEmployees {
-		pdf.CellFormat(12, 8, fmt.Sprintf("%d", i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(28, 8, empRel.Employee.NIP, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(50, 8, empRel.Employee.Name, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(90, 8, empRel.Employee.Position.Title, "1", 1, "L", false, 0, "")
+		drawEmployeeRow(pdf, i+1, empRel.Employee.NIP, empRel.Employee.Name, empRel.Employee.Position.Title, empColWidths, 9)
 	}
 	pdf.Ln(3)
 
@@ -661,6 +653,55 @@ func (pg *PDFGenerator) GenerateCombinedPDF(request *models.TravelRequest, repor
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// Helper function to draw employee table row with text wrapping for position
+func drawEmployeeRow(pdf *gofpdf.Fpdf, no int, nip, name, position string, colWidths []float64, fontSize float64) {
+	currentY := pdf.GetY()
+	x := 15.0 // Left margin
+
+	// First pass: calculate text height for position
+	pdf.SetFont("Arial", "", fontSize)
+	tempY := currentY
+	pdf.SetXY(x+colWidths[0]+colWidths[1]+colWidths[2]+1, tempY+1)
+	beforeY := pdf.GetY()
+	// Use temporary MultiCell to calculate height
+	pdf.MultiCell(colWidths[3]-2, 3, position, "", "L", false)
+	afterY := pdf.GetY()
+	textHeight := afterY - beforeY
+
+	// Determine row height (minimum 8mm)
+	rowHeight := 8.0
+	if textHeight+2 > rowHeight {
+		rowHeight = textHeight + 2
+	}
+
+	// Reset position and draw actual cells
+	pdf.SetXY(x, currentY)
+
+	// Draw NO cell with border
+	pdf.CellFormat(colWidths[0], rowHeight, fmt.Sprintf("%d", no), "1", 0, "C", false, 0, "")
+
+	// Draw NIP cell with border
+	pdf.CellFormat(colWidths[1], rowHeight, nip, "1", 0, "C", false, 0, "")
+
+	// Draw NAME cell with border
+	pdf.CellFormat(colWidths[2], rowHeight, name, "1", 0, "L", false, 0, "")
+
+	// Position cell - draw border first
+	posX := pdf.GetX()
+	pdf.Rect(posX, currentY, colWidths[3], rowHeight, "D")
+
+	// Draw position text with vertical centering
+	yOffset := (rowHeight - textHeight) / 2
+	if yOffset < 0 {
+		yOffset = 0.5
+	}
+	pdf.SetXY(posX+1, currentY+yOffset)
+	pdf.MultiCell(colWidths[3]-2, 3, position, "", "L", false)
+
+	// Move to next row
+	pdf.SetXY(x, currentY+rowHeight)
 }
 
 // Helper function to convert numbers to Indonesian words

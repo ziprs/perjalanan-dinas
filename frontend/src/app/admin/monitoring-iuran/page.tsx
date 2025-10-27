@@ -23,6 +23,8 @@ export default function MonitoringIuranPage() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState<number | 'all'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadData();
@@ -100,6 +102,17 @@ export default function MonitoringIuranPage() {
     if (selectedEmployeeId === null) return null;
     return employeeSummaries.find(s => s.employee.id === selectedEmployeeId);
   }, [selectedEmployeeId, employeeSummaries]);
+
+  // Pagination for employee summaries
+  const totalPages = Math.ceil(employeeSummaries.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEmployeeSummaries = employeeSummaries.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -338,7 +351,7 @@ export default function MonitoringIuranPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {employeeSummaries.map((summary) => (
+                {currentEmployeeSummaries.map((summary) => (
                   <tr key={summary.employee.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
                       {summary.employee.nip}
@@ -372,6 +385,48 @@ export default function MonitoringIuranPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {employeeSummaries.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+              <div className="text-sm text-gray-700">
+                Menampilkan {startIndex + 1} - {Math.min(endIndex, employeeSummaries.length)} dari {employeeSummaries.length} pegawai
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Sebelumnya
+                </button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`px-4 py-2 border rounded-lg text-sm font-medium ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Selanjutnya
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Employee Detail Modal/Section */}
