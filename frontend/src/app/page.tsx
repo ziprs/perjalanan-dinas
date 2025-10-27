@@ -394,7 +394,7 @@ export default function Home() {
               </button>
 
               <a
-                href="/admin/login"
+                href="/spd/admin/login"
                 className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium transition-colors"
               >
                 Admin Login
