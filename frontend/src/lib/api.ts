@@ -16,7 +16,7 @@ import type {
   UpdateRepresentativeData,
 } from '@/types';
 
-const API_URL = process.env.API_URL || 'http://localhost:8080/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://103.235.75.196/spd/api';
 
 // Create axios instance
 const api = axios.create({
