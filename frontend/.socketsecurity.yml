@@ -1,0 +1,55 @@
+# Socket Security Configuration
+version: v1
+
+# Project settings
+project:
+  name: perjalanan-dinas-frontend
+  description: Frontend application for travel request management
+
+# Security rules
+rules:
+  # High severity issues
+  malware:
+    enabled: true
+    action: error
+
+  install-scripts:
+    enabled: true
+    action: warn
+
+  # Medium severity issues
+  deprecated:
+    enabled: true
+    action: warn
+
+  unmaintained:
+    enabled: true
+    action: warn
+
+  # Supply chain risks
+  typosquat:
+    enabled: true
+    action: error
+
+  # License compliance
+  license:
+    enabled: true
+    action: warn
+    allowed:
+      - MIT
+      - Apache-2.0
+      - BSD-2-Clause
+      - BSD-3-Clause
+      - ISC
+    blocked:
+      - GPL-3.0
+      - AGPL-3.0
+
+# Ignore specific packages (if needed)
+ignore:
+  packages: []
+
+# Scan settings
+scan:
+  dependencies: true
+  devDependencies: true

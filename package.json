@@ -1,0 +1,28 @@
+{
+  "name": "perjalanan-dinas",
+  "version": "1.0.0",
+  "description": "Travel Request Management System",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && air",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && go build -o app cmd/api/main.go",
+    "security:scan": "npm run security:frontend",
+    "security:frontend": "cd frontend && npm audit",
+    "security:frontend:fix": "cd frontend && npm audit fix",
+    "security:socket": "cd frontend && npx socket-security ci",
+    "lint:frontend": "cd frontend && npm run lint"
+  },
+  "keywords": [
+    "travel",
+    "management",
+    "golang",
+    "nextjs"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@socketsecurity/cli": "^1.0.0"
+  }
+}
