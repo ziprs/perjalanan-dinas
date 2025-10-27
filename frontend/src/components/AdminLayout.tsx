@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!authAPI.isAuthenticated()) {
-      router.push('/admin/login');
+      router.push('/spd/admin/login');
     } else {
       setUsername(localStorage.getItem('username') || '');
     }
@@ -21,16 +21,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = () => {
     if (confirm('Apakah Anda yakin ingin logout?')) {
       authAPI.logout();
-      router.push('/admin/login');
+      router.push('/spd/admin/login');
     }
   };
 
   const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard' },
-    { href: '/admin/employees', label: 'Kelola Karyawan' },
-    { href: '/admin/travel-requests', label: 'Daftar Perjalanan Dinas' },
-    { href: '/admin/monitoring-iuran', label: 'Monitoring Iuran' },
-    { href: '/admin/settings', label: 'Pengaturan' },
+    { href: '/spd/admin/dashboard', label: 'Dashboard' },
+    { href: '/spd/admin/employees', label: 'Kelola Karyawan' },
+    { href: '/spd/admin/travel-requests', label: 'Daftar Perjalanan Dinas' },
+    { href: '/spd/admin/monitoring-iuran', label: 'Monitoring Iuran' },
+    { href: '/spd/admin/settings', label: 'Pengaturan' },
   ];
 
   return (
