@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import SPDForm from '@/components/SPDForm';
 import AtCostForm from '@/components/AtCostForm';
 
@@ -14,10 +15,13 @@ export default function Home() {
         <div className="bg-white rounded-lg shadow-xl p-8">
           {/* Logo Section */}
           <div className="flex justify-center mb-6">
-            <img
+            <Image
               src="/logo-digibank.png"
               alt="Divisi Digital Banking"
+              width={200}
+              height={96}
               className="h-24 w-auto object-contain"
+              priority
             />
           </div>
 
