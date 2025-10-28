@@ -16,12 +16,13 @@ export default function Home() {
           {/* Logo Section */}
           <div className="flex justify-center mb-6">
             <Image
-              src="/logo-digibank.png"
+              src="/spd/logo-digibank.png"
               alt="Divisi Digital Banking"
               width={200}
               height={96}
               className="h-24 w-auto object-contain"
               priority
+              unoptimized
             />
           </div>
 
