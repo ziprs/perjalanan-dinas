@@ -259,3 +259,75 @@ func (h *TravelRequestHandler) DeleteTravelRequest(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Travel request deleted successfully"})
 }
+
+// EmployeeSPDStats represents SPD statistics for an employee
+type EmployeeSPDStats struct {
+	EmployeeID   uint   `json:"employee_id"`
+	EmployeeName string `json:"employee_name"`
+	NIP          string `json:"nip"`
+	Position     string `json:"position"`
+	SPDCount     int    `json:"spd_count"`
+}
+
+// GetEmployeeSPDStats returns SPD statistics for all employees in current year
+func (h *TravelRequestHandler) GetEmployeeSPDStats(c *gin.Context) {
+	// Get year from query parameter, default to current year
+	yearStr := c.DefaultQuery("year", fmt.Sprintf("%d", time.Now().Year()))
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid year parameter"})
+		return
+	}
+
+	// Get all travel requests for the year
+	requests, err := h.repo.GetAllTravelRequests()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch travel requests"})
+		return
+	}
+
+	// Map to count SPD per employee
+	employeeStats := make(map[uint]*EmployeeSPDStats)
+
+	for _, req := range requests {
+		// Check if request is in the specified year
+		if req.DepartureDate.Year() != year {
+			continue
+		}
+
+		// Count each employee in the request
+		for _, emp := range req.Employees {
+			if stats, exists := employeeStats[emp.ID]; exists {
+				stats.SPDCount++
+			} else {
+				employeeStats[emp.ID] = &EmployeeSPDStats{
+					EmployeeID:   emp.ID,
+					EmployeeName: emp.Name,
+					NIP:          emp.NIP,
+					Position:     emp.Position,
+					SPDCount:     1,
+				}
+			}
+		}
+	}
+
+	// Convert map to slice and sort by SPD count
+	statsList := make([]EmployeeSPDStats, 0, len(employeeStats))
+	for _, stats := range employeeStats {
+		statsList = append(statsList, *stats)
+	}
+
+	// Sort by SPD count descending
+	for i := 0; i < len(statsList); i++ {
+		for j := i + 1; j < len(statsList); j++ {
+			if statsList[j].SPDCount > statsList[i].SPDCount {
+				statsList[i], statsList[j] = statsList[j], statsList[i]
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"year":  year,
+		"stats": statsList,
+	})
+}

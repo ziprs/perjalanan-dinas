@@ -69,6 +69,7 @@ func main() {
 
 		// Travel requests - public for employees to submit
 		public.POST("/travel-requests", travelRequestHandler.CreateTravelRequest)
+		public.GET("/travel-requests/stats/employees", travelRequestHandler.GetEmployeeSPDStats)
 		public.GET("/travel-requests/:id", travelRequestHandler.GetTravelRequestByID)
 		public.GET("/travel-requests", travelRequestHandler.GetAllTravelRequests)
 

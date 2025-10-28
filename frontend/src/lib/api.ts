@@ -137,6 +137,12 @@ export const travelRequestAPI = {
   delete: async (id: number): Promise<void> => {
     await api.delete(`/admin/travel-requests/${id}`);
   },
+
+  getEmployeeStats: async (year?: number): Promise<any> => {
+    const params = year ? `?year=${year}` : '';
+    const response = await api.get(`/travel-requests/stats/employees${params}`);
+    return response.data;
+  },
 };
 
 // Travel Report API
