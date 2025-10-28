@@ -296,15 +296,15 @@ func (h *TravelRequestHandler) GetEmployeeSPDStats(c *gin.Context) {
 		}
 
 		// Count each employee in the request
-		for _, emp := range req.Employees {
-			if stats, exists := employeeStats[emp.ID]; exists {
+		for _, empRel := range req.TravelRequestEmployees {
+			if stats, exists := employeeStats[empRel.Employee.ID]; exists {
 				stats.SPDCount++
 			} else {
-				employeeStats[emp.ID] = &EmployeeSPDStats{
-					EmployeeID:   emp.ID,
-					EmployeeName: emp.Name,
-					NIP:          emp.NIP,
-					Position:     emp.Position,
+				employeeStats[empRel.Employee.ID] = &EmployeeSPDStats{
+					EmployeeID:   empRel.Employee.ID,
+					EmployeeName: empRel.Employee.Name,
+					NIP:          empRel.Employee.NIP,
+					Position:     empRel.Employee.Position.Title,
 					SPDCount:     1,
 				}
 			}
