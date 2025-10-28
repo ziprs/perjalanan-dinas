@@ -17,6 +17,10 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) GetDB() *gorm.DB {
+	return r.db
+}
+
 // Admin operations
 func (r *Repository) GetAdminByUsername(username string) (*models.Admin, error) {
 	var admin models.Admin
@@ -227,11 +231,6 @@ func padLeft(num int, length int) string {
 	return fmt.Sprintf("%0"+fmt.Sprintf("%d", length)+"d", num)
 }
 
-// GetDB returns the database instance (for handler access)
-func (r *Repository) GetDB() *gorm.DB {
-	return r.db
-}
-
 // CreateTravelRequestEmployee creates a new travel request employee relation
 func (r *Repository) CreateTravelRequestEmployee(empRel *models.TravelRequestEmployee) error {
 	return r.db.Create(empRel).Error
@@ -256,4 +255,87 @@ func (r *Repository) GetRepresentativeConfig() (*models.RepresentativeConfig, er
 
 func (r *Repository) UpdateRepresentativeConfig(config *models.RepresentativeConfig) error {
 	return r.db.Save(config).Error
+}
+
+// AtCost Claim operations
+func (r *Repository) CreateAtCostClaim(claim *models.AtCostClaim) error {
+	return r.db.Create(claim).Error
+}
+
+func (r *Repository) GetAtCostClaimByID(id uint) (*models.AtCostClaim, error) {
+	var claim models.AtCostClaim
+	err := r.db.
+		Preload("TravelRequest").
+		Preload("TravelRequest.TravelRequestEmployees").
+		Preload("TravelRequest.TravelRequestEmployees.Employee").
+		Preload("TravelRequest.TravelRequestEmployees.Employee.Position").
+		Preload("ClaimItems").
+		Preload("ClaimItems.Employee").
+		Preload("ClaimItems.Employee.Position").
+		Preload("ClaimItems.Receipts").
+		First(&claim, id).Error
+	return &claim, err
+}
+
+func (r *Repository) GetAtCostClaimByTravelRequestID(travelRequestID uint) (*models.AtCostClaim, error) {
+	var claim models.AtCostClaim
+	err := r.db.
+		Preload("TravelRequest").
+		Preload("ClaimItems").
+		Preload("ClaimItems.Employee").
+		Preload("ClaimItems.Employee.Position").
+		Preload("ClaimItems.Receipts").
+		Where("travel_request_id = ?", travelRequestID).
+		First(&claim).Error
+	return &claim, err
+}
+
+func (r *Repository) GetAllAtCostClaims() ([]models.AtCostClaim, error) {
+	var claims []models.AtCostClaim
+	err := r.db.
+		Preload("TravelRequest").
+		Preload("ClaimItems").
+		Preload("ClaimItems.Employee").
+		Order("created_at DESC").
+		Find(&claims).Error
+	return claims, err
+}
+
+func (r *Repository) UpdateAtCostClaim(claim *models.AtCostClaim) error {
+	return r.db.Save(claim).Error
+}
+
+func (r *Repository) DeleteAtCostClaim(id uint) error {
+	return r.db.Delete(&models.AtCostClaim{}, id).Error
+}
+
+// AtCost Claim Item operations
+func (r *Repository) CreateAtCostClaimItem(item *models.AtCostClaimItem) error {
+	return r.db.Create(item).Error
+}
+
+func (r *Repository) GetAtCostClaimItemsByClaimID(claimID uint) ([]models.AtCostClaimItem, error) {
+	var items []models.AtCostClaimItem
+	err := r.db.
+		Preload("Employee").
+		Preload("Employee.Position").
+		Preload("Receipts").
+		Where("at_cost_claim_id = ?", claimID).
+		Find(&items).Error
+	return items, err
+}
+
+// AtCost Receipt operations
+func (r *Repository) CreateAtCostReceipt(receipt *models.AtCostReceipt) error {
+	return r.db.Create(receipt).Error
+}
+
+func (r *Repository) GetAtCostReceiptsByClaimItemID(claimItemID uint) ([]models.AtCostReceipt, error) {
+	var receipts []models.AtCostReceipt
+	err := r.db.Where("claim_item_id = ?", claimItemID).Find(&receipts).Error
+	return receipts, err
+}
+
+func (r *Repository) DeleteAtCostReceipt(id uint) error {
+	return r.db.Delete(&models.AtCostReceipt{}, id).Error
 }

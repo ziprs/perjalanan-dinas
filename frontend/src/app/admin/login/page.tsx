@@ -18,7 +18,7 @@ export default function AdminLogin() {
       localStorage.setItem('token', response.token);
       localStorage.setItem('username', response.username);
       alert('Login berhasil!');
-      router.push('/spd/admin/dashboard');
+      router.push('/admin/dashboard');
     } catch (error: any) {
       console.error('Login failed:', error);
       alert(error.response?.data?.error || 'Login gagal');

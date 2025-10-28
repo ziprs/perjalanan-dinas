@@ -120,7 +120,7 @@ export const positionCodeAPI = {
 // Travel Request API
 export const travelRequestAPI = {
   getAll: async (): Promise<TravelRequest[]> => {
-    const response = await api.get('/admin/travel-requests');
+    const response = await api.get('/travel-requests');
     return response.data.travel_requests;
   },
 
@@ -165,6 +165,14 @@ export const pdfAPI = {
   downloadCombined: (id: number): string => {
     return `${API_URL}/pdf/combined/${id}`;
   },
+
+  downloadNotaAtCost: (id: number): string => {
+    return `${API_URL}/pdf/nota-atcost/${id}`;
+  },
+
+  downloadCombinedAtCost: (id: number): string => {
+    return `${API_URL}/pdf/combined-atcost/${id}`;
+  },
 };
 
 // Representative Config API
@@ -177,6 +185,76 @@ export const representativeAPI = {
   updateConfig: async (data: UpdateRepresentativeData): Promise<RepresentativeConfig> => {
     const response = await api.put('/admin/representative-config', data);
     return response.data.data;
+  },
+};
+
+// At-Cost API
+export const atCostAPI = {
+  // Upload and parse receipt
+  uploadReceipt: async (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('receipt', file);
+    const response = await api.post('/at-cost/upload-receipt', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Create at-cost claim
+  createClaim: async (data: any): Promise<any> => {
+    const response = await api.post('/at-cost/claims', data);
+    return response.data;
+  },
+
+  // Get all claims
+  getAllClaims: async (): Promise<any[]> => {
+    const response = await api.get('/at-cost/claims');
+    return response.data.claims;
+  },
+
+  // Get claim by ID
+  getClaimById: async (id: number): Promise<any> => {
+    const response = await api.get(`/at-cost/claims/${id}`);
+    return response.data.claim;
+  },
+
+  // Get claim by travel request ID
+  getClaimByTravelRequest: async (travelRequestId: number): Promise<any> => {
+    const response = await api.get(`/at-cost/claims/travel-request/${travelRequestId}`);
+    return response.data.claim;
+  },
+
+  // Update claim status
+  updateClaimStatus: async (id: number, status: string): Promise<void> => {
+    await api.put(`/admin/at-cost/claims/${id}/status`, { status });
+  },
+
+  // Delete claim
+  deleteClaim: async (id: number): Promise<void> => {
+    await api.delete(`/admin/at-cost/claims/${id}`);
+  },
+
+  // Download receipt
+  downloadReceipt: (receiptId: number): string => {
+    return `${API_URL}/at-cost/receipts/${receiptId}/download`;
+  },
+
+  // Download Nota At-Cost PDF
+  downloadNotaAtCost: (id: number): string => {
+    return `${API_URL}/pdf/nota-atcost/${id}`;
+  },
+
+  // Download Combined PDF (nota + receipts)
+  downloadCombinedAtCost: (id: number): string => {
+    return `${API_URL}/pdf/combined-atcost/${id}`;
+  },
+
+  // Parse manual text (for testing)
+  parseManual: async (text: string): Promise<any> => {
+    const response = await api.post('/admin/at-cost/parse-manual', { text });
+    return response.data;
   },
 };
 

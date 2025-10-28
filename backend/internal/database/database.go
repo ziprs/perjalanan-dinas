@@ -42,6 +42,9 @@ func ConnectDatabase(cfg *config.Config) error {
 		&models.VisitProof{},
 		&models.NumberingConfig{},
 		&models.RepresentativeConfig{},
+		&models.AtCostClaim{},
+		&models.AtCostClaimItem{},
+		&models.AtCostReceipt{},
 	)
 
 	if err != nil {

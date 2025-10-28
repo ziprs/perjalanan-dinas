@@ -37,6 +37,7 @@ func main() {
 	pdfHandler := handlers.NewPDFHandler(repo)
 	excelHandler := handlers.NewExcelHandler(repo)
 	representativeHandler := handlers.NewRepresentativeHandler(repo)
+	atCostHandler := handlers.NewAtCostHandler(repo)
 	healthHandler := handlers.NewHealthHandler()
 
 	// Setup Gin router
@@ -69,11 +70,21 @@ func main() {
 		// Travel requests - public for employees to submit
 		public.POST("/travel-requests", travelRequestHandler.CreateTravelRequest)
 		public.GET("/travel-requests/:id", travelRequestHandler.GetTravelRequestByID)
+		public.GET("/travel-requests", travelRequestHandler.GetAllTravelRequests)
+
+		// At-Cost claims - public for employees to submit
+		public.POST("/at-cost/upload-receipt", atCostHandler.UploadReceipt)
+		public.POST("/at-cost/claims", atCostHandler.CreateAtCostClaim)
+		public.GET("/at-cost/claims", atCostHandler.GetAllAtCostClaims)
+		public.GET("/at-cost/claims/:id", atCostHandler.GetAtCostClaim)
+		public.GET("/at-cost/receipts/:receipt_id/download", atCostHandler.DownloadReceipt)
 
 		// PDF downloads - public
 		public.GET("/pdf/nota-permintaan/:id", pdfHandler.DownloadNotaPermintaan)
 		public.GET("/pdf/berita-acara/:id", pdfHandler.DownloadBeritaAcara)
 		public.GET("/pdf/combined/:id", pdfHandler.DownloadCombinedPDF)
+		public.GET("/pdf/nota-atcost/:id", atCostHandler.DownloadNotaAtCost)
+		public.GET("/pdf/combined-atcost/:id", atCostHandler.DownloadCombinedAtCost)
 	}
 
 	// Protected routes (require authentication)
@@ -99,6 +110,17 @@ func main() {
 		// Representative config
 		protected.GET("/representative-config", representativeHandler.GetRepresentativeConfig)
 		protected.PUT("/representative-config", representativeHandler.UpdateRepresentativeConfig)
+
+		// At-Cost claims
+		protected.POST("/at-cost/upload-receipt", atCostHandler.UploadReceipt)
+		protected.POST("/at-cost/claims", atCostHandler.CreateAtCostClaim)
+		protected.GET("/at-cost/claims", atCostHandler.GetAllAtCostClaims)
+		protected.GET("/at-cost/claims/:id", atCostHandler.GetAtCostClaim)
+		protected.GET("/at-cost/claims/travel-request/:travel_request_id", atCostHandler.GetAtCostClaimByTravelRequest)
+		protected.PUT("/at-cost/claims/:id/status", atCostHandler.UpdateClaimStatus)
+		protected.DELETE("/at-cost/claims/:id", atCostHandler.DeleteAtCostClaim)
+		protected.GET("/at-cost/receipts/:receipt_id/download", atCostHandler.DownloadReceipt)
+		protected.POST("/at-cost/parse-manual", atCostHandler.ParseReceiptManual)
 	}
 
 	// Start server

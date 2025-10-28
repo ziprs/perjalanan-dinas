@@ -141,7 +141,7 @@ func (pg *PDFGenerator) GenerateNotaPermintaan(request *models.TravelRequest) ([
 		repPosition = request.TravelReport.RepresentativePosition
 	}
 
-	pdf.SetFont("Arial", "B", 11)
+	pdf.SetFont("Arial", "BU", 11)
 	pdf.SetX(x2)
 	pdf.CellFormat(90, 6, repName, "", 1, "C", false, 0, "")
 	pdf.SetFont("Arial", "", 11)
@@ -453,7 +453,7 @@ func (pg *PDFGenerator) addNotaPermintaanPage(pdf *gofpdf.Fpdf, request *models.
 		repPosition = request.TravelReport.RepresentativePosition
 	}
 
-	pdf.SetFont("Arial", "B", 11)
+	pdf.SetFont("Arial", "BU", 11)
 	pdf.SetX(x2)
 	pdf.CellFormat(90, 6, repName, "", 1, "C", false, 0, "")
 	pdf.SetFont("Arial", "", 11)

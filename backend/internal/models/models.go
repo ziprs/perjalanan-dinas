@@ -123,3 +123,54 @@ type RepresentativeConfig struct {
 	UpdatedAt time.Time     `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+// AtCostClaim represents claim untuk biaya transportasi dan akomodasi
+type AtCostClaim struct {
+	ID                     uint                    `gorm:"primarykey" json:"id"`
+	TravelRequestID        uint                    `gorm:"not null" json:"travel_request_id"`
+	TravelRequest          TravelRequest           `gorm:"foreignKey:TravelRequestID" json:"travel_request"`
+	ClaimNumber            string                  `gorm:"unique;not null" json:"claim_number"`                 // 064/{seq}/DIB/{code}/NOTA (same sequence)
+	RepresentativeName     string                  `gorm:"not null" json:"representative_name"`                 // VP name
+	RepresentativePosition string                  `gorm:"not null" json:"representative_position"`             // VP position
+	Status                 string                  `gorm:"default:'pending'" json:"status"`                     // pending, approved, rejected
+	TotalAmount            int                     `gorm:"not null;default:0" json:"total_amount"`              // Total semua klaim
+	ClaimItems             []AtCostClaimItem       `gorm:"foreignKey:AtCostClaimID" json:"claim_items"`
+	CreatedAt              time.Time               `json:"created_at"`
+	UpdatedAt              time.Time               `json:"updated_at"`
+	DeletedAt              gorm.DeletedAt          `gorm:"index" json:"-"`
+}
+
+// AtCostClaimItem represents detail klaim per karyawan
+type AtCostClaimItem struct {
+	ID              uint                      `gorm:"primarykey" json:"id"`
+	AtCostClaimID   uint                      `gorm:"not null" json:"at_cost_claim_id"`
+	EmployeeID      uint                      `gorm:"not null" json:"employee_id"`
+	Employee        Employee                  `gorm:"foreignKey:EmployeeID" json:"employee"`
+	TransportCost   int                       `gorm:"not null;default:0" json:"transport_cost"`    // Biaya transportasi
+	AccommodationCost int                     `gorm:"not null;default:0" json:"accommodation_cost"` // Biaya penginapan
+	TotalCost       int                       `gorm:"not null;default:0" json:"total_cost"`        // Total per karyawan
+	Receipts        []AtCostReceipt           `gorm:"foreignKey:ClaimItemID" json:"receipts"`
+	CreatedAt       time.Time                 `json:"created_at"`
+	UpdatedAt       time.Time                 `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt            `gorm:"index" json:"-"`
+}
+
+// AtCostReceipt represents bukti pembayaran (invoice/receipt)
+type AtCostReceipt struct {
+	ID              uint           `gorm:"primarykey" json:"id"`
+	ClaimItemID     uint           `gorm:"not null" json:"claim_item_id"`
+	ReceiptNumber   string         `json:"receipt_number"`                        // Nomor receipt dari Traveloka/tiket.com
+	ReceiptDate     time.Time      `json:"receipt_date"`                          // Tanggal receipt
+	Vendor          string         `json:"vendor"`                                // Traveloka, tiket.com, etc
+	Type            string         `gorm:"not null" json:"type"`                  // flight, hotel, train
+	Description     string         `gorm:"type:text" json:"description"`          // Deskripsi item
+	Amount          int            `gorm:"not null" json:"amount"`                // Nominal
+	FilePath        string         `gorm:"not null" json:"file_path"`             // Path ke file PDF
+	FileName        string         `gorm:"not null" json:"file_name"`             // Original filename
+	PassengerName   string         `json:"passenger_name"`                        // Nama penumpang dari receipt
+	RouteOrLocation string         `json:"route_or_location"`                     // SUB-HLP or Hotel name
+	ParsedData      string         `gorm:"type:jsonb" json:"parsed_data,omitempty"` // Data hasil parsing OCR (JSON)
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
+}
