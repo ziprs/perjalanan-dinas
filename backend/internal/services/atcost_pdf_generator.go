@@ -167,45 +167,75 @@ func (g *AtCostPDFGenerator) drawTravelProofSection(pdf *gofpdf.Fpdf, claim *mod
 		startX := pdf.GetX()
 		startY := pdf.GetY()
 
-		// No.
-		pdf.SetXY(startX, startY)
-		pdf.CellFormat(8, 14, fmt.Sprintf("%d.", i+1), "1", 0, "C", false, 0, "")
-
-		// Name with NIP - centered vertically, showing actual NIP
-		pdf.SetXY(startX+8, startY+3.5)
+		// Calculate heights for all columns using SplitLines to avoid side effects
 		nameText := fmt.Sprintf("%s\n(%s)", item.Employee.Name, item.Employee.NIP)
-		pdf.MultiCell(45, 4, nameText, "", "L", false)
+		nameLines := pdf.SplitLines([]byte(nameText), 45-2)
+		nameHeight := float64(len(nameLines)) * 4
 
-		// Position - moved HIGHER UP to be truly centered (same as name position)
-		pdf.SetXY(startX+53, startY+3.5)
-		pdf.MultiCell(42, 4, item.Employee.Position.Title, "", "L", false)
+		positionLines := pdf.SplitLines([]byte(item.Employee.Position.Title), 42-2)
+		positionHeight := float64(len(positionLines)) * 4
 
-		// Dates
-		pdf.SetXY(startX+95, startY+1)
 		dateRange := fmt.Sprintf("%s s/d\n%s\n(%d hari)",
 			tr.DepartureDate.Format("2 Jan 2006"),
 			tr.ReturnDate.Format("2 Jan 2006"),
 			tr.DurationDays)
-		pdf.MultiCell(38, 4, dateRange, "", "C", false)
+		dateLines := pdf.SplitLines([]byte(dateRange), 38-2)
+		dateHeight := float64(len(dateLines)) * 4
 
-		// Destination/Purpose - moved HIGHER UP to match position
-		pdf.SetXY(startX+133, startY+3.5)
-		pdf.MultiCell(47, 4, tr.Purpose, "", "L", false)
+		purposeLines := pdf.SplitLines([]byte(tr.Purpose), 47-2)
+		purposeHeight := float64(len(purposeLines)) * 4
 
-		// Draw borders manually for alignment
-		currentY := pdf.GetY()
-		if currentY-startY < 14 {
-			currentY = startY + 14
+		// Determine row height - take the maximum of all column heights
+		contentHeight := nameHeight
+		if positionHeight > contentHeight {
+			contentHeight = positionHeight
+		}
+		if dateHeight > contentHeight {
+			contentHeight = dateHeight
+		}
+		if purposeHeight > contentHeight {
+			contentHeight = purposeHeight
+		}
+		// Add padding and minimum height
+		rowHeight := contentHeight + 7 // Add padding top+bottom
+		if rowHeight < 14 {
+			rowHeight = 14
 		}
 
+		// Calculate vertical centering offsets
+		nameYOffset := (rowHeight - nameHeight) / 2
+		positionYOffset := (rowHeight - positionHeight) / 2
+		dateYOffset := (rowHeight - dateHeight) / 2
+		purposeYOffset := (rowHeight - purposeHeight) / 2
+
+		// Name with NIP - vertically centered
+		pdf.SetXY(startX+8+1, startY+nameYOffset)
+		pdf.MultiCell(45-2, 4, nameText, "", "L", false)
+
+		// Position - vertically centered
+		pdf.SetXY(startX+53+1, startY+positionYOffset)
+		pdf.MultiCell(42-2, 4, item.Employee.Position.Title, "", "L", false)
+
+		// Dates - vertically centered
+		pdf.SetXY(startX+95+1, startY+dateYOffset)
+		pdf.MultiCell(38-2, 4, dateRange, "", "C", false)
+
+		// Destination/Purpose - vertically centered
+		pdf.SetXY(startX+133+1, startY+purposeYOffset)
+		pdf.MultiCell(47-2, 4, tr.Purpose, "", "L", false)
+
+		// No. - Draw with calculated row height
+		pdf.SetXY(startX, startY)
+		pdf.CellFormat(8, rowHeight, fmt.Sprintf("%d.", i+1), "1", 0, "C", false, 0, "")
+
 		// Draw cell borders
-		pdf.Rect(startX+8, startY, 45, currentY-startY, "D")
-		pdf.Rect(startX+53, startY, 42, currentY-startY, "D")
-		pdf.Rect(startX+95, startY, 38, currentY-startY, "D")
-		pdf.Rect(startX+133, startY, 47, currentY-startY, "D")
+		pdf.Rect(startX+8, startY, 45, rowHeight, "D")
+		pdf.Rect(startX+53, startY, 42, rowHeight, "D")
+		pdf.Rect(startX+95, startY, 38, rowHeight, "D")
+		pdf.Rect(startX+133, startY, 47, rowHeight, "D")
 
 		// Move to next row
-		pdf.SetXY(startX, currentY)
+		pdf.SetXY(startX, startY+rowHeight)
 	}
 }
 
@@ -233,25 +263,40 @@ func (g *AtCostPDFGenerator) drawAccommodationSection(pdf *gofpdf.Fpdf, claim *m
 		startX := pdf.GetX()
 		startY := pdf.GetY()
 
-		// No.
-		pdf.SetXY(startX, startY)
-		pdf.CellFormat(8, 14, fmt.Sprintf("%d.", i+1), "1", 0, "C", false, 0, "")
-
-		// Name with NIP - centered vertically, showing actual NIP
-		pdf.SetXY(startX+8, startY+3.5)
+		// Calculate heights for name and position using SplitLines to avoid side effects
 		nameText := fmt.Sprintf("%s\n(%s)", item.Employee.Name, item.Employee.NIP)
-		pdf.MultiCell(45, 4, nameText, "", "L", false)
+		nameLines := pdf.SplitLines([]byte(nameText), 45-2)
+		nameHeight := float64(len(nameLines)) * 4
 
-		// Position - moved HIGHER UP to be truly centered (same as name position)
-		pdf.SetXY(startX+53, startY+3.5)
-		pdf.MultiCell(42, 4, item.Employee.Position.Title, "", "L", false)
+		positionLines := pdf.SplitLines([]byte(item.Employee.Position.Title), 42-2)
+		positionHeight := float64(len(positionLines)) * 4
 
-		// Calculate row height
-		currentY := pdf.GetY()
-		if currentY-startY < 14 {
-			currentY = startY + 14
+		// Determine row height - take the maximum of name and position heights
+		contentHeight := nameHeight
+		if positionHeight > contentHeight {
+			contentHeight = positionHeight
 		}
-		rowHeight := currentY - startY
+		// Add padding and minimum height
+		rowHeight := contentHeight + 7 // Add padding top+bottom
+		if rowHeight < 14 {
+			rowHeight = 14
+		}
+
+		// Calculate vertical centering offset
+		nameYOffset := (rowHeight - nameHeight) / 2
+		positionYOffset := (rowHeight - positionHeight) / 2
+
+		// Name with NIP - vertically centered
+		pdf.SetXY(startX+8+1, startY+nameYOffset)
+		pdf.MultiCell(45-2, 4, nameText, "", "L", false)
+
+		// Position - vertically centered
+		pdf.SetXY(startX+53+1, startY+positionYOffset)
+		pdf.MultiCell(42-2, 4, item.Employee.Position.Title, "", "L", false)
+
+		// No. - Draw with calculated row height
+		pdf.SetXY(startX, startY)
+		pdf.CellFormat(8, rowHeight, fmt.Sprintf("%d.", i+1), "1", 0, "C", false, 0, "")
 
 		// Draw borders for text columns
 		pdf.Rect(startX+8, startY, 45, rowHeight, "D")
@@ -274,7 +319,7 @@ func (g *AtCostPDFGenerator) drawAccommodationSection(pdf *gofpdf.Fpdf, claim *m
 		pdf.CellFormat(29, rowHeight, formatCurrency(item.TotalCost), "1", 0, "R", false, 0, "")
 
 		// Move to next row
-		pdf.SetXY(startX, currentY)
+		pdf.SetXY(startX, startY+rowHeight)
 	}
 
 	// Total row
