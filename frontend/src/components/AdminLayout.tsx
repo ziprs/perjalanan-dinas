@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex">
               <div className="flex-shrink-0 flex items-center space-x-3">
                 <img
-                  src="/logo-digibank.png"
+                  src="/spd/logo-digibank.png"
                   alt="Divisi Digital Banking"
                   className="h-10 w-auto object-contain"
                 />

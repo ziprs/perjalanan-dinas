@@ -34,7 +34,7 @@ export default function AdminLogin() {
           {/* Logo Section */}
           <div className="flex justify-center mb-6">
             <img
-              src="/logo-digibank.png"
+              src="/spd/logo-digibank.png"
               alt="Divisi Digital Banking"
               className="h-24 w-auto object-contain"
             />
