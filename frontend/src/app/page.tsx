@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import SPDForm from '@/components/SPDForm';
 import AtCostForm from '@/components/AtCostForm';
 
@@ -58,12 +59,12 @@ export default function Home() {
 
           {/* Admin Login Link */}
           <div className="mt-6 text-center">
-            <a
+            <Link
               href="/admin/login"
               className="inline-block px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium transition-colors"
             >
               Admin Login
-            </a>
+            </Link>
           </div>
         </div>
 
