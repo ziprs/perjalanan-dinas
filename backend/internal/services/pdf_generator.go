@@ -660,15 +660,12 @@ func drawEmployeeRow(pdf *gofpdf.Fpdf, no int, nip, name, position string, colWi
 	currentY := pdf.GetY()
 	x := 15.0 // Left margin
 
-	// First pass: calculate text height for position
+	// First pass: calculate text height for position using SplitLines
 	pdf.SetFont("Arial", "", fontSize)
-	tempY := currentY
-	pdf.SetXY(x+colWidths[0]+colWidths[1]+colWidths[2]+1, tempY+1)
-	beforeY := pdf.GetY()
-	// Use temporary MultiCell to calculate height
-	pdf.MultiCell(colWidths[3]-2, 3, position, "", "L", false)
-	afterY := pdf.GetY()
-	textHeight := afterY - beforeY
+	lines := pdf.SplitLines([]byte(position), colWidths[3]-2)
+	numLines := len(lines)
+	lineHeight := 3.0
+	textHeight := float64(numLines) * lineHeight
 
 	// Determine row height (minimum 8mm)
 	rowHeight := 8.0
@@ -676,10 +673,8 @@ func drawEmployeeRow(pdf *gofpdf.Fpdf, no int, nip, name, position string, colWi
 		rowHeight = textHeight + 2
 	}
 
-	// Reset position and draw actual cells
-	pdf.SetXY(x, currentY)
-
 	// Draw NO cell with border
+	pdf.SetXY(x, currentY)
 	pdf.CellFormat(colWidths[0], rowHeight, fmt.Sprintf("%d", no), "1", 0, "C", false, 0, "")
 
 	// Draw NIP cell with border
@@ -698,7 +693,7 @@ func drawEmployeeRow(pdf *gofpdf.Fpdf, no int, nip, name, position string, colWi
 		yOffset = 0.5
 	}
 	pdf.SetXY(posX+1, currentY+yOffset)
-	pdf.MultiCell(colWidths[3]-2, 3, position, "", "L", false)
+	pdf.MultiCell(colWidths[3]-2, lineHeight, position, "", "L", false)
 
 	// Move to next row
 	pdf.SetXY(x, currentY+rowHeight)
